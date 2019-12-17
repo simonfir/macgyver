@@ -1,3 +1,5 @@
+from random import shuffle
+
 import pygame
 from pygame.locals import *
 
@@ -46,6 +48,7 @@ class MacGyver(GameElement):
 
     def __init__(self, coordinates):
         GameElement.__init__(self, 'ressource/macgyver.png', coordinates)
+        self.inventory = []
 
     def next_tile_in_direction(self, key_pressed):
         """Get the coordinates of the tile in the direction
@@ -57,6 +60,10 @@ class MacGyver(GameElement):
         """Move MacGyver to a tile coordinates"""
         self.x, self.y = coordinates
         self.draw()
+
+    def pick_up(self, tool):
+        """Add tool in inventory"""
+        self.inventory.append(tool)
 
 
 class Maze:
@@ -103,6 +110,12 @@ class Maze:
     def draw_path(self, coordinates):
         """Blit path tile"""
         self.paths[coordinates].draw()
+
+    def random_path_tiles(self, n):
+        """Get the coordinates (in tiles) of n random path tiles"""
+        coords = list(self.paths.keys())
+        shuffle(coords)
+        return coords[:n]
 
 
 def draw_text(text):
