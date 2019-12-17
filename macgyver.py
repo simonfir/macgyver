@@ -105,13 +105,28 @@ class Maze:
         self.paths[coordinates].draw()
 
 
+def draw_text(text):
+    """Blit text centered on display"""
+    # Font size proportional to tile size
+    font = pygame.font.Font(None, TILE_SIZE * 4)
+    text = font.render(text, 1, (255, 255, 255))
+    # Center text.
+    display_rect = pygame.display.get_surface().get_rect()
+    text_rect = text.get_rect()
+    text_rect.center = display_rect.center
+    # Blit
+    pygame.display.get_surface().blit(text, text_rect)
+
+
 def main():
     """Initialization and main loop of the game"""
     # Initialization
     pygame.init()
     maze = Maze('maze.txt')
     macgyver = MacGyver(maze.start)
+    guard = GameElement('ressource/gardien.png', maze.exit)
     pygame.display.update()
+
     # Main loop
     while 1:
         # Get events.
@@ -121,13 +136,17 @@ def main():
             # If directional key pressed, get next tile coordinates and
             # check if it's on the maze path (MacGyver can't cross walls
             # or go outside the maze boundaries.) then move macgyver.
-            if event.type == KEYDOWN and event.key in VECTORS:
+            elif event.type == KEYDOWN and event.key in VECTORS:
                 next_tile = macgyver.next_tile_in_direction(event.key)
                 if next_tile in maze.paths:
-                    # Erase macgyver on previous tile
+                    # Erase macgyver on previous tile.
                     maze.draw_path(macgyver.coordinates)
                     macgyver.move_to_tile(next_tile)
                     pygame.display.update()
+                    # Player wins when he reaches the guard.
+                    if next_tile == guard.coordinates:
+                        draw_text('YOU WIN!')
+                        pygame.display.update()
         pygame.time.wait(100)
 
 
