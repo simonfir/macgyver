@@ -10,7 +10,7 @@ VECTORS = {
         K_RIGHT: (1, 0),
         K_UP: (0, -1),
         K_DOWN: (0, 1),
-        } 
+        }
 
 
 class GameElement:
@@ -128,25 +128,34 @@ def main():
     pygame.display.update()
 
     # Main loop
+    keys_down = {}
     while 1:
-        # Get events.
         for event in pygame.event.get():
             if event.type == QUIT:
                 return
-            # If directional key pressed, get next tile coordinates and
-            # check if it's on the maze path (MacGyver can't cross walls
-            # or go outside the maze boundaries.) then move macgyver.
-            elif event.type == KEYDOWN and event.key in VECTORS:
-                next_tile = macgyver.next_tile_in_direction(event.key)
+            # Update which keys are beeing pressed in keys_down:
+            if event.type == KEYDOWN and event.key in VECTORS:
+                keys_down[event.key] = True
+            elif event.type == KEYUP and event.key in VECTORS:
+                keys_down[event.key] = False
+
+        # For each directional key down, get the next tile
+        # coordinates in the direction of the key and move macgyver if
+        # that tile is on the maze path (MacGyver can't cross walls or
+        # go outside the maze boundaries.)
+        for key in keys_down:
+            if keys_down[key] is True:
+                next_tile = macgyver.next_tile_in_direction(key)
                 if next_tile in maze.paths:
                     # Erase macgyver on previous tile.
                     maze.draw_path(macgyver.coordinates)
                     macgyver.move_to_tile(next_tile)
-                    pygame.display.update()
                     # Player wins when he reaches the guard.
                     if next_tile == guard.coordinates:
                         draw_text('YOU WIN!')
-                        pygame.display.update()
+
+        # Refresh display
+        pygame.display.update()
         pygame.time.wait(100)
 
 
