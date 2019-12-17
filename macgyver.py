@@ -86,8 +86,8 @@ class Maze:
         self.paths = {}
 
         # initialize pygame display
-        pygame.display.set_mode((TILE_SIZE * self.height,
-                                 TILE_SIZE * self.width))
+        pygame.display.set_mode((TILE_SIZE * self.width,
+                                 TILE_SIZE * self.height))
 
         # For each character and its coordinates, add the coresponding
         # GameElememnts, then update the display
@@ -129,11 +129,10 @@ class Maze:
         del self.objects[coordinates]
 
 
-def draw_text(text):
+def draw_text(text, color="white"):
     """Blit text centered on display"""
-    # Font size proportional to tile size
-    font = pygame.font.Font(None, TILE_SIZE * 3)
-    text = font.render(text, 1, (255, 255, 255))
+    font = pygame.font.Font(None, 100)
+    text = font.render(text, 1, pygame.Color(color))
     # Center text.
     display_rect = pygame.display.get_surface().get_rect()
     text_rect = text.get_rect()
@@ -183,9 +182,11 @@ def main():
                     # every objects, otherwise, game over.
                     if next_tile == guard.coordinates:
                         if len(maze.objects) == 0:
-                            draw_text('YOU WIN!')
+                            draw_text('YOU WIN!', '#ffff99')
                         else:
-                            draw_text('GAME OVER')
+                            # Erase MacGyver
+                            guard.draw()
+                            draw_text('GAME OVER', 'red')
 
         # Refresh display
         pygame.display.update()
