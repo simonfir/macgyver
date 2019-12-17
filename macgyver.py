@@ -6,17 +6,11 @@ TILE_SIZE = 40
 # Vector pointing to the next tile in the direction corresponding
 # to the directional key.
 VECTORS = {
-        K_LEFT: (-TILE_SIZE, 0),
-        K_RIGHT: (TILE_SIZE, 0),
-        K_UP: (0, -TILE_SIZE),
-        K_DOWN: (0, TILE_SIZE),
+        K_LEFT: (-1, 0),
+        K_RIGHT: (1, 0),
+        K_UP: (0, -1),
+        K_DOWN: (0, 1),
         } 
-
-
-def tile_coords_to_rect(x, y):
-    """Convert maze coordinates in tiles to position in pixels on the
-    pygame display. Return a pygame.Rect object."""
-    return pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
 
 class GameElement:
@@ -25,15 +19,22 @@ class GameElement:
         """Create element from image file and tile coordinates.
 
         - filename (str): image file
-        - coordinates (tuple): tile's x, y coordinates
+        - coordinates (tuple): x, y coordinates in tiles
         """
-        # Convert coords in tiles to pixel position.
-        x, y = coordinates
-        self.rect = tile_coords_to_rect(x, y)
-        # Load image, scale it to fit TILE_SIZE and blit it.
+        # Store coordinates in tiles (they will be converted to pixels
+        # in the draw method)
+        self.x, self.y = coordinates
+        # Load image, scale it to fit TILE_SIZE and draw element.
         self.image = pygame.transform.scale(
             pygame.image.load(filename).convert_alpha(), (TILE_SIZE, TILE_SIZE))
-        pygame.display.get_surface().blit(self.image, self.rect)
+        self.draw()
+
+    def draw(self):
+        """Blit element's image on the screen"""
+        # convert tile coordinates to pixel positions
+        rect = pygame.Rect(self.x * TILE_SIZE, self.y * TILE_SIZE,
+                           TILE_SIZE, TILE_SIZE)
+        pygame.display.get_surface().blit(self.image, rect)
 
 
 class MacGyver(GameElement):
@@ -42,17 +43,16 @@ class MacGyver(GameElement):
         GameElement.__init__(self, 'ressource/macgyver.png', coordinates)
         pygame.display.update()
 
-    def move_in_direction(self, key_pressed):
-        """ Move MacGyver to the next tile in the direction corresponding
-        to the key pressed."""
-        # Add the vector coresponding to the directional key pressed
-        # to the position.
-        x, y = VECTORS[key_pressed]
-        self.rect.x += x
-        self.rect.y += y
-        # Blit and update display.
-        pygame.display.get_surface().blit(self.image, self.rect)
-        pygame.display.update()
+    def next_tile_in_direction(self, key_pressed):
+        """Get the coordinates of the tile in the direction
+        corresponding to the key pressed"""
+        vx, vy = VECTORS[key_pressed]
+        return (self.x + vx, self.y + vy)
+
+    def move_to_tile(self, coordinates):
+        """Move MacGyver to a tile coordinates"""
+        self.x, self.y = coordinates
+        self.draw()
 
 
 class Maze:
@@ -75,9 +75,9 @@ class Maze:
         # Initialize maze's attributes
         self.height = len(lines)
         self.width = len(lines[0])
-        # Group objects
-        self.walls = []
-        self.paths = []
+        # Dictionaries: self.wall[x, y] = GameElement
+        self.walls = {}
+        self.paths = {}
 
         # initialize pygame display
         pygame.init()
@@ -89,11 +89,9 @@ class Maze:
         for y, line in enumerate(lines):
             for x, char in enumerate(line):
                 if char == '#':
-                    self.walls.append(GameElement(
-                        'ressource/wall.png', (x, y)))
+                    self.walls[x, y] = GameElement('ressource/wall.png', (x, y))
                 elif char in (' ', 'S', 'E'):
-                    self.paths.append(GameElement(
-                        'ressource/path.png', (x, y)))
+                    self.paths[x, y] = GameElement('ressource/path.png', (x, y))
                 if char == 'S':
                     self.start = (x, y)
                 elif char == 'E':
@@ -112,9 +110,14 @@ def main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 return
-            # If directional key pressed, move macgyver.
+            # If directional key pressed, get next tile coordinates and
+            # check if it's on the maze path (MacGyver can't cross walls
+            # or go outside the maze boundaries.) then move macgyver.
             if event.type == KEYDOWN and event.key in VECTORS:
-                macgyver.move_in_direction(event.key)
+                next_tile = macgyver.next_tile_in_direction(event.key)
+                if next_tile in maze.paths:
+                    macgyver.move_to_tile(next_tile)
+                    pygame.display.update()
         pygame.time.wait(100)
 
 
