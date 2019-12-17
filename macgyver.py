@@ -48,7 +48,6 @@ class MacGyver(GameElement):
 
     def __init__(self, coordinates):
         GameElement.__init__(self, 'ressource/macgyver.png', coordinates)
-        self.inventory = []
 
     def next_tile_in_direction(self, key_pressed):
         """Get the coordinates of the tile in the direction
@@ -60,10 +59,6 @@ class MacGyver(GameElement):
         """Move MacGyver to a tile coordinates"""
         self.x, self.y = coordinates
         self.draw()
-
-    def pick_up(self, tool):
-        """Add tool in inventory"""
-        self.inventory.append(tool)
 
 
 class Maze:
@@ -111,17 +106,30 @@ class Maze:
         """Blit path tile"""
         self.paths[coordinates].draw()
 
-    def random_path_tiles(self, n):
+    def _random_path_tiles(self, n):
         """Get the coordinates (in tiles) of n random path tiles"""
         coords = list(self.paths.keys())
         shuffle(coords)
         return coords[:n]
 
+    def add_objects(self, *filenames):
+        """Add all objects to maze take image file names as arguments"""
+        nbr_objects = len(filenames)
+        # Get random coordinates
+        coords = self._random_path_tiles(nbr_objects)
+        # Like self.walls and self.paths
+        self.objects = {coords[i]: GameElement(filenames[i], coords[i])
+                        for i in range(nbr_objects)}
+
+    def remove_object(self, coordinates):
+        """Delete object at coordinates from maze"""
+        del self.objects[coordinates]
+
 
 def draw_text(text):
     """Blit text centered on display"""
     # Font size proportional to tile size
-    font = pygame.font.Font(None, TILE_SIZE * 4)
+    font = pygame.font.Font(None, TILE_SIZE * 3)
     text = font.render(text, 1, (255, 255, 255))
     # Center text.
     display_rect = pygame.display.get_surface().get_rect()
@@ -138,6 +146,8 @@ def main():
     maze = Maze('maze.txt')
     macgyver = MacGyver(maze.start)
     guard = GameElement('ressource/gardien.png', maze.exit)
+    maze.add_objects('ressource/aiguille.png', 'ressource/seringue.png',
+                     'ressource/tube_plastique.png', 'ressource/ether.png')
     pygame.display.update()
 
     # Main loop
@@ -163,9 +173,16 @@ def main():
                     # Erase macgyver on previous tile.
                     maze.draw_path(macgyver.coordinates)
                     macgyver.move_to_tile(next_tile)
-                    # Player wins when he reaches the guard.
+                    # Pick up object
+                    if next_tile in maze.objects:
+                        maze.remove_object(next_tile)
+                    # Player wins when he reaches the guard and has
+                    # every objects, otherwise, game over.
                     if next_tile == guard.coordinates:
-                        draw_text('YOU WIN!')
+                        if len(maze.objects) == 0:
+                            draw_text('YOU WIN!')
+                        else:
+                            draw_text('GAME OVER')
 
         # Refresh display
         pygame.display.update()
