@@ -109,6 +109,9 @@ class Maze:
     def _random_path_tiles(self, n):
         """Get the coordinates (in tiles) of n random path tiles"""
         coords = list(self.paths.keys())
+        # Don't add objects on start or exit
+        coords.remove(self.start)
+        coords.remove(self.exit)
         shuffle(coords)
         return coords[:n]
 
