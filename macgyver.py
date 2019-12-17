@@ -46,7 +46,6 @@ class MacGyver(GameElement):
 
     def __init__(self, coordinates):
         GameElement.__init__(self, 'ressource/macgyver.png', coordinates)
-        pygame.display.update()
 
     def next_tile_in_direction(self, key_pressed):
         """Get the coordinates of the tile in the direction
@@ -85,7 +84,6 @@ class Maze:
         self.paths = {}
 
         # initialize pygame display
-        pygame.init()
         pygame.display.set_mode((TILE_SIZE * self.height,
                                  TILE_SIZE * self.width))
 
@@ -101,7 +99,6 @@ class Maze:
                     self.start = (x, y)
                 elif char == 'E':
                     self.exit = (x, y)
-        pygame.display.update()
 
     def draw_path(self, coordinates):
         """Blit path tile"""
@@ -111,8 +108,10 @@ class Maze:
 def main():
     """Initialization and main loop of the game"""
     # Initialization
+    pygame.init()
     maze = Maze('maze.txt')
     macgyver = MacGyver(maze.start)
+    pygame.display.update()
     # Main loop
     while 1:
         # Get events.
