@@ -29,6 +29,11 @@ class GameElement:
             pygame.image.load(filename).convert_alpha(), (TILE_SIZE, TILE_SIZE))
         self.draw()
 
+    @property
+    def coordinates(self):
+        """Get coordinates (in tiles). Return a tuple"""
+        return (self.x, self.y)
+
     def draw(self):
         """Blit element's image on the screen"""
         # convert tile coordinates to pixel positions
@@ -98,6 +103,10 @@ class Maze:
                     self.exit = (x, y)
         pygame.display.update()
 
+    def draw_path(self, coordinates):
+        """Blit path tile"""
+        self.paths[coordinates].draw()
+
 
 def main():
     """Initialization and main loop of the game"""
@@ -116,6 +125,8 @@ def main():
             if event.type == KEYDOWN and event.key in VECTORS:
                 next_tile = macgyver.next_tile_in_direction(event.key)
                 if next_tile in maze.paths:
+                    # Erase macgyver on previous tile
+                    maze.draw_path(macgyver.coordinates)
                     macgyver.move_to_tile(next_tile)
                     pygame.display.update()
         pygame.time.wait(100)
