@@ -61,6 +61,38 @@ class MacGyver(GameElement):
         self.draw()
 
 
+class Counter:
+    """Display a count of the objects collected"""
+
+    def __init__(self, coordinates, total):
+        """Create counter with 0 objects, and draw it
+
+        coordinates -- coordinates in tiles
+        total -- the total number of objects to be collected"""
+        self.collected = 0
+        self.total = total
+        self.x, self.y = coordinates
+        self._draw()
+
+    def increment(self):
+        """Increment and update counter"""
+        self.collected += 1
+        self._draw()
+
+    def _draw(self):
+        """Draw counter on display"""
+        font = pygame.font.Font(None, TILE_SIZE)
+        text = font.render(
+            'Objects collected : {}/{}'.format(self.collected, self.total),
+            1, pygame.Color('#888866'))
+        text_rect = text.get_rect().move(self.x * TILE_SIZE, self.y * TILE_SIZE)
+        # Erease previous text with black rectangle
+        pygame.draw.rect(pygame.display.get_surface(), pygame.Color('black'),
+                         text_rect)
+        # Blit new text
+        pygame.display.get_surface().blit(text, text_rect)
+
+
 class Maze:
     """Object containing the maze's elements: walls tiles, path tiles"""
 
@@ -87,7 +119,7 @@ class Maze:
 
         # initialize pygame display
         pygame.display.set_mode((TILE_SIZE * self.width,
-                                 TILE_SIZE * self.height))
+                                 TILE_SIZE * (self.height + 1)))
 
         # For each character and its coordinates, add the coresponding
         # GameElememnts
@@ -117,7 +149,9 @@ class Maze:
 
     def add_objects(self, *filenames):
         """Add all objects to maze take image file names as arguments"""
+        # Create counter
         nbr_objects = len(filenames)
+        self.counter = Counter((1, self.height), nbr_objects)
         # Get random coordinates
         coords = self._random_path_tiles(nbr_objects)
         # Like self.walls and self.paths
@@ -125,11 +159,12 @@ class Maze:
                         for i in range(nbr_objects)}
 
     def remove_object(self, coordinates):
-        """Delete object at coordinates from maze"""
+        """Delete object at coordinates from maze and update counter"""
         del self.objects[coordinates]
+        self.counter.increment()
 
 
-def draw_text(text, color="white"):
+def draw_text(text, color='white'):
     """Blit text centered on display"""
     font = pygame.font.Font(None, 100)
     text = font.render(text, 1, pygame.Color(color))
@@ -172,7 +207,7 @@ def main():
             if not down:
                 continue
             next_tile = macgyver.next_tile_in_direction(key)
-            if not next_tile in maze.paths:
+            if next_tile not in maze.paths:
                 continue
             # Erase macgyver on previous tile.
             maze.draw_path(macgyver.coordinates)
