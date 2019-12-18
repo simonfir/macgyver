@@ -187,6 +187,10 @@ def main():
                             # Erase MacGyver
                             guard.draw()
                             draw_text('GAME OVER', 'red')
+                        pygame.display.update()
+                        # Close game.
+                        pygame.time.wait(3000)
+                        return 
 
         # Refresh display
         pygame.display.update()
