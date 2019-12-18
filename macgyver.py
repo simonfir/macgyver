@@ -8,11 +8,11 @@ TILE_SIZE = 40
 # Vector pointing to the next tile in the direction corresponding
 # to the directional key.
 VECTORS = {
-        K_LEFT: (-1, 0),
-        K_RIGHT: (1, 0),
-        K_UP: (0, -1),
-        K_DOWN: (0, 1),
-        }
+    K_LEFT: (-1, 0),
+    K_RIGHT: (1, 0),
+    K_UP: (0, -1),
+    K_DOWN: (0, 1),
+    }
 
 
 class GameElement:
@@ -90,7 +90,7 @@ class Maze:
                                  TILE_SIZE * self.height))
 
         # For each character and its coordinates, add the coresponding
-        # GameElememnts, then update the display
+        # GameElememnts
         for y, line in enumerate(lines):
             for x, char in enumerate(line):
                 if char == '#':
@@ -168,29 +168,31 @@ def main():
         # coordinates in the direction of the key and move macgyver if
         # that tile is on the maze path (MacGyver can't cross walls or
         # go outside the maze boundaries.)
-        for key in keys_down:
-            if keys_down[key] is True:
-                next_tile = macgyver.next_tile_in_direction(key)
-                if next_tile in maze.paths:
-                    # Erase macgyver on previous tile.
-                    maze.draw_path(macgyver.coordinates)
-                    macgyver.move_to_tile(next_tile)
-                    # Pick up object
-                    if next_tile in maze.objects:
-                        maze.remove_object(next_tile)
-                    # Player wins when he reaches the guard and has
-                    # every objects, otherwise, game over.
-                    if next_tile == guard.coordinates:
-                        if len(maze.objects) == 0:
-                            draw_text('YOU WIN!', '#ffff99')
-                        else:
-                            # Erase MacGyver
-                            guard.draw()
-                            draw_text('GAME OVER', 'red')
-                        pygame.display.update()
-                        # Close game.
-                        pygame.time.wait(3000)
-                        return 
+        for key, down in keys_down.items():
+            if not down:
+                continue
+            next_tile = macgyver.next_tile_in_direction(key)
+            if not next_tile in maze.paths:
+                continue
+            # Erase macgyver on previous tile.
+            maze.draw_path(macgyver.coordinates)
+            macgyver.move_to_tile(next_tile)
+            # Pick up object
+            if next_tile in maze.objects:
+                maze.remove_object(next_tile)
+            # Player wins when he reaches the guard and has every
+            # objects, otherwise, game over.
+            if next_tile == guard.coordinates:
+                if len(maze.objects) == 0:
+                    draw_text('YOU WIN!', '#ffff99')
+                else:
+                    # Erase MacGyver
+                    guard.draw()
+                    draw_text('GAME OVER', 'red')
+                # Close game.
+                pygame.display.update()
+                pygame.time.wait(2000)
+                return
 
         # Refresh display
         pygame.display.update()
