@@ -114,26 +114,38 @@ class Maze:
         # Initialize maze's attributes
         self.height = len(lines)
         self.width = len(lines[0])
+        self.start = None
+        self.exit = None
         # Dictionaries: self.wall[x, y] = GameElement
         self.walls = {}
         self.paths = {}
 
-        # initialize pygame display
+        # Set display's dimensions
         pygame.display.set_mode((TILE_SIZE * self.width,
                                  TILE_SIZE * (self.height + 1)))
 
         # For each character and its coordinates, add the coresponding
         # GameElememnts
         for y, line in enumerate(lines):
+            # Make sure if all rows have the same width
+            if len(line) != self.width:
+                raise Exception('Inconsitant width for line {} in maze file'
+                                .format(y + 1))
             for x, char in enumerate(line):
                 if char == '#':
                     self.walls[x, y] = GameElement(wall_file, (x, y))
                 elif char in (' ', 'S', 'E'):
                     self.paths[x, y] = GameElement(path_file, (x, y))
+                else:
+                    raise Exception("Invalid character '{}' at {},{} in maze file"
+                                    .format(char, y + 1, x + 1))
                 if char == 'S':
                     self.start = (x, y)
                 elif char == 'E':
                     self.exit = (x, y)
+
+        if self.start is None or self.exit is None:
+            raise Exception('Start or exit missing from maze file')
 
     def draw_path(self, coordinates):
         """Blit path tile"""
