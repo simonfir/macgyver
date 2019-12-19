@@ -117,7 +117,6 @@ class Maze:
         self.start = None
         self.exit = None
         # Dictionaries: self.wall[x, y] = GameElement
-        self.walls = {}
         self.paths = {}
 
         # Set display's dimensions
@@ -133,7 +132,7 @@ class Maze:
                                 .format(y + 1))
             for x, char in enumerate(line):
                 if char == '#':
-                    self.walls[x, y] = GameElement(wall_file, (x, y))
+                    GameElement(wall_file, (x, y))
                 elif char in (' ', 'S', 'E'):
                     self.paths[x, y] = GameElement(path_file, (x, y))
                 else:
