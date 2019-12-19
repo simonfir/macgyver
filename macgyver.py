@@ -1,4 +1,5 @@
 from random import shuffle
+from os import path
 
 import pygame
 from pygame.locals import *
@@ -27,8 +28,10 @@ class GameElement:
         # in the draw method)
         self.x, self.y = coordinates
         # Load image, scale it to fit TILE_SIZE and draw element.
+        filename = path.join(path.dirname(__file__), 'ressource', filename)
         self.image = pygame.transform.scale(
-            pygame.image.load(filename).convert_alpha(), (TILE_SIZE, TILE_SIZE))
+            pygame.image.load(filename).convert_alpha(),
+            (TILE_SIZE, TILE_SIZE))
         self.draw()
 
     @property
@@ -45,9 +48,6 @@ class GameElement:
 
 
 class MacGyver(GameElement):
-
-    def __init__(self, coordinates):
-        GameElement.__init__(self, 'ressource/macgyver.png', coordinates)
 
     def next_tile_in_direction(self, key_pressed):
         """Get the coordinates of the tile in the direction
@@ -96,7 +96,7 @@ class Counter:
 class Maze:
     """Object containing the maze's elements: walls tiles, path tiles"""
 
-    def __init__(self, filename):
+    def __init__(self, maze_file, wall_file, path_file):
         """Load maze map from file and initialize pygame display.
 
         The file must contain a visual representation of the maze map
@@ -106,8 +106,9 @@ class Maze:
         - start: 'S'
         - exit: 'E'
         """
+        maze_file = path.join(path.dirname(__file__), maze_file)
         # Get list of file's lines without newline characters.
-        with open(filename, 'r') as f:
+        with open(maze_file, 'r') as f:
             lines = [l[:-1] for l in f]
 
         # Initialize maze's attributes
@@ -126,9 +127,9 @@ class Maze:
         for y, line in enumerate(lines):
             for x, char in enumerate(line):
                 if char == '#':
-                    self.walls[x, y] = GameElement('ressource/wall.png', (x, y))
+                    self.walls[x, y] = GameElement(wall_file, (x, y))
                 elif char in (' ', 'S', 'E'):
-                    self.paths[x, y] = GameElement('ressource/path.png', (x, y))
+                    self.paths[x, y] = GameElement(path_file, (x, y))
                 if char == 'S':
                     self.start = (x, y)
                 elif char == 'E':
@@ -180,11 +181,11 @@ def main():
     """Initialization and main loop of the game"""
     # Initialization
     pygame.init()
-    maze = Maze('maze2.txt')
-    macgyver = MacGyver(maze.start)
-    guard = GameElement('ressource/gardien.png', maze.exit)
-    maze.add_objects('ressource/aiguille.png', 'ressource/seringue.png',
-                     'ressource/tube_plastique.png', 'ressource/ether.png')
+    maze = Maze('maze.txt', 'wall.png', 'path.png')
+    macgyver = MacGyver('macgyver.png', maze.start)
+    guard = GameElement('gardien.png', maze.exit)
+    maze.add_objects('aiguille.png', 'ether.png',
+                     'seringue.png', 'tube_plastique.png')
     pygame.display.update()
 
     # Main loop
