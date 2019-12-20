@@ -17,12 +17,14 @@ VECTORS = {
 
 
 class GameElement:
+    """Represent an element of the game: an image that can be drawn on a
+    tile."""
 
     def __init__(self, filename, coordinates):
         """Create element from image file and tile coordinates.
 
-        - filename (str): image file
-        - coordinates (tuple): x, y coordinates in tiles
+        filename -- image file name
+        coordinates -- (x, y) coordinates mesured in tiles
         """
         # Store coordinates in tiles (they will be converted to pixels
         # in the draw method)
@@ -36,11 +38,11 @@ class GameElement:
 
     @property
     def coordinates(self):
-        """Get coordinates (in tiles). Return a tuple"""
+        """Get coordinates (in tiles). Return a tuple."""
         return (self.x, self.y)
 
     def draw(self):
-        """Blit element's image on the screen"""
+        """Blit element's image on the screen."""
         # convert tile coordinates to pixel positions
         rect = pygame.Rect(self.x * TILE_SIZE, self.y * TILE_SIZE,
                            TILE_SIZE, TILE_SIZE)
@@ -48,26 +50,29 @@ class GameElement:
 
 
 class MacGyver(GameElement):
+    """GameElement that can be moved."""
 
-    def next_tile_in_direction(self, key_pressed):
-        """Get the coordinates of the tile in the direction
-        corresponding to the key pressed"""
-        vx, vy = VECTORS[key_pressed]
+    def next_tile_in_direction(self, key):
+        """Get the coordinates of the tile in the direction corresponding
+        to the key pressed. Return (x, y) tuple.
+
+        key -- pygame key constant"""
+        vx, vy = VECTORS[key]
         return (self.x + vx, self.y + vy)
 
     def move_to_tile(self, coordinates):
-        """Move MacGyver to a tile coordinates"""
+        """Move MacGyver to a tile coordinates."""
         self.x, self.y = coordinates
         self.draw()
 
 
 class Counter:
-    """Display a count of the objects collected"""
+    """Display a count of the objects collected."""
 
     def __init__(self, coordinates, total):
-        """Create counter with 0 objects, and draw it
+        """Create counter initialized at 0 and draw it.
 
-        coordinates -- coordinates in tiles
+        coordinates -- (in tiles) where to draw the counter
         total -- the total number of objects to be collected"""
         self.collected = 0
         self.total = total
@@ -75,12 +80,12 @@ class Counter:
         self._draw()
 
     def increment(self):
-        """Increment and update counter"""
+        """Increment and update counter."""
         self.collected += 1
         self._draw()
 
     def _draw(self):
-        """Draw counter on display"""
+        """Draw counter on display."""
         font = pygame.font.Font(None, TILE_SIZE)
         text = font.render(
             'Objects collected : {}/{}'.format(self.collected, self.total),
@@ -94,17 +99,21 @@ class Counter:
 
 
 class Maze:
-    """Object containing the maze's elements: walls tiles, path tiles"""
+    """Object containing the maze's elements: walls and path tiles,
+    start and exit tions."""
 
     def __init__(self, maze_file, wall_file, path_file):
-        """Load maze map from file and initialize pygame display.
+        """Load maze map from file.
 
-        The file must contain a visual representation of the maze map
-        where each tile is represented by a character:
-        - wall: '#'
-        - path: ' ' (space)
-        - start: 'S'
-        - exit: 'E'
+        wall_file -- image file name
+        path_file -- image file name
+        maze_file -- maze map file name
+            The maze file must contain a visual representation of the
+            maze map where each tile is represented by a character:
+            - wall: '#'
+            - path: ' ' (space)
+            - start: 'S'
+            - exit: 'E'
         """
         maze_file = path.join(path.dirname(__file__), maze_file)
         # Get list of file's lines without newline characters.
@@ -116,8 +125,7 @@ class Maze:
         self.width = len(lines[0])
         self.start = None
         self.exit = None
-        # Dictionaries: self.wall[x, y] = GameElement
-        self.walls = {}
+        # Dictionaries: self.paths[x, y] = GameElement
         self.paths = {}
 
         # Set display's dimensions
@@ -148,11 +156,11 @@ class Maze:
             raise Exception('Start or exit missing from maze file')
 
     def draw_path(self, coordinates):
-        """Blit path tile"""
+        """Blit path tile."""
         self.paths[coordinates].draw()
 
     def random_path_tiles(self, n):
-        """Get the coordinates (in tiles) of n random path tiles"""
+        """Get the coordinates (in tiles) of n random path tiles."""
         coords = list(self.paths.keys())
         # Don't add objects on start or exit
         coords.remove(self.start)
@@ -162,7 +170,7 @@ class Maze:
 
 
 def draw_text(text, color='white'):
-    """Blit text centered on display"""
+    """Blit text centered on display."""
     font = pygame.font.Font(None, 100)
     text = font.render(text, 1, pygame.Color(color))
     # Center text.
@@ -174,7 +182,7 @@ def draw_text(text, color='white'):
 
 
 def main():
-    """Initialization and main loop of the game"""
+    """Initialization and main loop of the game."""
     # Initialization
     pygame.init()
     maze = Maze('maze.txt', 'wall.png', 'path.png')
