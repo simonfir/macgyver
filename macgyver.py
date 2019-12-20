@@ -117,6 +117,7 @@ class Maze:
         self.start = None
         self.exit = None
         # Dictionaries: self.wall[x, y] = GameElement
+        self.walls = {}
         self.paths = {}
 
         # Set display's dimensions
@@ -150,7 +151,7 @@ class Maze:
         """Blit path tile"""
         self.paths[coordinates].draw()
 
-    def _random_path_tiles(self, n):
+    def random_path_tiles(self, n):
         """Get the coordinates (in tiles) of n random path tiles"""
         coords = list(self.paths.keys())
         # Don't add objects on start or exit
@@ -158,22 +159,6 @@ class Maze:
         coords.remove(self.exit)
         shuffle(coords)
         return coords[:n]
-
-    def add_objects(self, *filenames):
-        """Add all objects to maze take image file names as arguments"""
-        # Create counter
-        nbr_objects = len(filenames)
-        self.counter = Counter((1, self.height), nbr_objects)
-        # Get random coordinates
-        coords = self._random_path_tiles(nbr_objects)
-        # Like self.walls and self.paths
-        self.objects = {coords[i]: GameElement(filenames[i], coords[i])
-                        for i in range(nbr_objects)}
-
-    def remove_object(self, coordinates):
-        """Delete object at coordinates from maze and update counter"""
-        del self.objects[coordinates]
-        self.counter.increment()
 
 
 def draw_text(text, color='white'):
@@ -193,10 +178,19 @@ def main():
     # Initialization
     pygame.init()
     maze = Maze('maze.txt', 'wall.png', 'path.png')
+    # Characters
     macgyver = MacGyver('macgyver.png', maze.start)
     guard = GameElement('gardien.png', maze.exit)
-    maze.add_objects('aiguille.png', 'ether.png',
-                     'seringue.png', 'tube_plastique.png')
+    # Objects
+    obj_images = ('aiguille.png', 'seringue.png',
+                  'tube_plastique.png', 'ether.png')
+    nbr_obj = len(obj_images)
+    obj_coords = maze.random_path_tiles(nbr_obj)
+    objects = {coords: GameElement(img, coords)
+               for img, coords in zip(obj_images, obj_coords)}
+    # Counter
+    counter = Counter((1, maze.height), nbr_obj)
+
     pygame.display.update()
 
     # Main loop
@@ -227,13 +221,14 @@ def main():
             macgyver.move_to_tile(next_tile)
 
             # Pick up object
-            if next_tile in maze.objects:
-                maze.remove_object(next_tile)
+            if next_tile in objects:
+                del objects[next_tile]
+                counter.increment()
 
             # Player wins when he reaches the guard and has got every
             # objects, if he hasn't, game over.
             if next_tile == guard.coordinates:
-                if len(maze.objects) == 0:
+                if not objects:
                     draw_text('YOU WIN!', '#ffff99')
                 else:
                     # Erase MacGyver
