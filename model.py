@@ -58,9 +58,8 @@ class MacGyver(GameElement):
         vx, vy = VECTORS[key]
         return self.x + vx, self.y + vy
 
-    def move_to(self, coordinates):
-        """Change MacGyver coordinates"""
-        self.x, self.y = coordinates
+    def move_in_direction(self, key):
+        self.x, self.y = self.next_tile_in_direction(key)
 
 
 class Guard(GameElement):
