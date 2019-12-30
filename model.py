@@ -10,7 +10,8 @@ VECTORS = {
     'down': (0, 1),
     }
 
-# Images file names
+# Data files names
+MAZE_MAP = 'maze.txt'
 IMAGES_DIR = 'ressource'
 WALL_IMG = 'wall.png'
 PATH_IMG = 'path.png'
@@ -29,7 +30,7 @@ class GameElement:
         """Create element from image file and tile coordinates.
 
         filename -- image file name
-        coordinates -- (x, y) coordinates mesured in tiles
+        coordinates -- (x, y) coordinates measured in tiles
         """
         # Store coordinates in tiles (they will be converted to pixels
         # in the draw method)
@@ -39,7 +40,7 @@ class GameElement:
     @property
     def coordinates(self):
         """Get coordinates (in tiles). Return a tuple."""
-        return (self.x, self.y)
+        return self.x, self.y
 
 
 class MacGyver(GameElement):
@@ -52,11 +53,13 @@ class MacGyver(GameElement):
         """Get the coordinates of the tile in the direction corresponding
         to the key pressed. Return (x, y) tuple.
 
-        key -- pygame key constant"""
+        key -- string: 'left', 'right', 'up' or 'down'
+        """
         vx, vy = VECTORS[key]
-        return (self.x + vx, self.y + vy)
+        return self.x + vx, self.y + vy
 
     def move_to(self, coordinates):
+        """Change MacGyver coordinates"""
         self.x, self.y = coordinates
 
 
@@ -66,35 +69,40 @@ class Guard(GameElement):
         GameElement.__init__(self, GUARD_IMG, coordinates)
 
 
-def create_objects(coords_list):
+def create_objects(coordinates_list):
+    """Create objects to collect.
+    Return a dictionary {coordinates: GameElement}
+
+    coordinates_list -- list of coordinates measured in tiles"""
     return {coords: GameElement(image, coords)
-            for image, coords in zip(OBJECTS_IMGS, coords_list)}
+            for image, coords in zip(OBJECTS_IMGS, coordinates_list)}
 
 
 class Counter:
-    """Display a count of the objects collected."""
+    """Count of the objects collected."""
 
-    def __init__(self, coordinates, total):
-        """Create counter initialized at 0 and draw it.
+    def __init__(self, total):
+        """Create counter initialized at 0.
 
-        coordinates -- (in tiles) where to draw the counter
         total -- the total number of objects to be collected"""
         self.collected = 0
         self.total = total
-        self.x, self.y = coordinates
-        self._draw()
 
     def increment(self):
         """Increment and update counter."""
         self.collected += 1
-        self._draw()
+
+    @property
+    def text(self):
+        """Get the text to display"""
+        return 'Collected objects: {}/{}'.format(self.collected, self.total)
 
 
 class Maze:
     """Object containing the maze's elements: walls and path tiles,
     start and exit tions."""
 
-    def __init__(self, maze_file):
+    def __init__(self):
         """Load maze map from file.
 
         maze_file -- maze map file name
@@ -105,7 +113,7 @@ class Maze:
             - start: 'S'
             - exit: 'E'
         """
-        maze_file = path.join(path.dirname(__file__), maze_file)
+        maze_file = path.join(path.dirname(__file__), MAZE_MAP)
         # Get list of file's lines without newline characters.
         with open(maze_file, 'r') as f:
             lines = [l[:-1] for l in f]
@@ -115,16 +123,16 @@ class Maze:
         self.width = len(lines[0])
         self.start = None
         self.exit = None
-        # Dictionaries: self.paths[x, y] = GameElement
+        # Dictionaries {coordinates: GameElement}
         self.paths = {}
         self.walls = {}
 
-        # For each character and its coordinates, add the coresponding
-        # GameElememnts
+        # For each character and its coordinates, add the corresponding
+        # GameElements
         for y, line in enumerate(lines):
-            # Make sure if all rows have the same width
+            # Make sure all rows have the same width.
             if len(line) != self.width:
-                raise Exception('Inconsitant width for line {} in maze file'
+                raise Exception('Inconsistent width for line {} in maze file'
                                 .format(y + 1))
             for x, char in enumerate(line):
                 if char == '#':
@@ -150,4 +158,3 @@ class Maze:
         coords.remove(self.exit)
         shuffle(coords)
         return coords[:n]
-

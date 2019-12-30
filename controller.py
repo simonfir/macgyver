@@ -1,27 +1,27 @@
 import model
 import view
 
+
 def main():
     """Initialization and main loop of the game."""
     # Initialization
     view.init()
-    maze = model.Maze('maze.txt')
-    view.set_dimensions(maze.width, maze.height)
+    maze = model.Maze()
+    # height + 1 to make space for counter.
+    view.set_dimensions(maze.width, maze.height + 1)
     # Characters
     macgyver = model.MacGyver(maze.start)
     guard = model.Guard(maze.exit)
     # Objects
-    coords = maze.random_path_tiles(model.NBR_OBJECTS)
-    objects = model.create_objects(coords)
+    coordinates_list = maze.random_path_tiles(model.NBR_OBJECTS)
+    objects = model.create_objects(coordinates_list)
     # Counter
-    #counter = model.Counter((1, maze.height), model.NBR_OBJECTS)
+    counter = model.Counter(model.NBR_OBJECTS)
 
-    view.draw(
-        *maze.paths.values(),
-        *maze.walls.values(),
-        guard,
-        macgyver,
-        *objects.values())
+    # Draw all the elements on screen:
+    view.draw(*maze.paths.values(), *maze.walls.values(),
+              guard, macgyver, *objects.values())
+    view.draw_text_at(counter.text, (0, maze.height))
 
     # Main loop
     keys_state = view.KeysState()
@@ -37,26 +37,29 @@ def main():
 
             # Erase macgyver on previous tile.
             view.draw(maze.paths[macgyver.coordinates])
+            # Move macgyver to next tile
             macgyver.move_to(next_tile)
             view.draw(macgyver)
 
             # Pick up object
-            if next_tile in objects:
-                del objects[next_tile]
-                #counter.increment()
+            if macgyver.coordinates in objects:
+                del objects[macgyver.coordinates]
+                counter.increment()
+                view.draw_text_at(counter.text, (0, maze.height))
 
-            # Player wins when he reaches the guard and has got every
-            # objects, if he hasn't, game over.
-            if next_tile == guard.coordinates:
+            # When MacGyver reaches the guard, if no objects are left
+            # in the maze, he wins; otherwise, game over.
+            if macgyver.coordinates == guard.coordinates:
                 if not objects:
-                    view.draw_text('YOU WIN!', '#ffff99')
+                    view.draw_centered_text('YOU WIN!', '#ffff99')
                 else:
-                    # Erase MacGyver
+                    # Erase MacGyver with guard.
                     view.draw(guard)
-                    view.draw_text('GAME OVER', 'red')
-                # Close game.
+                    view.draw_centered_text('GAME OVER', 'red')
+                # Wait 2 s and close game.
                 view.wait(2000)
                 return
+        # Only run loop every 100 ms
         view.wait(100)
 
 
