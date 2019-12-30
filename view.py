@@ -5,7 +5,6 @@ from pygame.locals import *
 
 
 TILE_SIZE = 40
-DIR_KEYS = {K_LEFT: 'left', K_RIGHT: 'right', K_UP: 'up', K_DOWN: 'down'}
 
 
 def wait(n):
@@ -29,6 +28,13 @@ def _coords_to_pixels(coordinates):
     return x * TILE_SIZE, y * TILE_SIZE
 
 
+def load_image(filename):
+    """Load, convert image and scale image to tile size."""
+    return pygame.transform.scale(
+        pygame.image.load(filename).convert_alpha(),
+        (TILE_SIZE, TILE_SIZE))
+
+
 def draw(*elements):
     """Blit element's images and update display
     
@@ -36,11 +42,8 @@ def draw(*elements):
     an attribute coordinates (tuple: coordinates in tiles)
     """
     for element in elements:
-        # Load, convert image and scale image to tile size.
-        image = pygame.transform.scale(
-            pygame.image.load(element.image).convert_alpha(),
-            (TILE_SIZE, TILE_SIZE))
         # Convert coordinates.
+        image = load_image(element.image)
         rect = pygame.Rect(_coords_to_pixels(element.coordinates),
                            (TILE_SIZE, TILE_SIZE))
         # Blit.
@@ -76,10 +79,12 @@ def draw_text_at(text, coordinates, color='white'):
 
 class KeysState:
     """Store the state (up or down) of the directional keys."""
+    # Convert pygame key constant to string
+    DIR_KEYS = {K_LEFT: 'left', K_RIGHT: 'right', K_UP: 'up', K_DOWN: 'down'}
 
     def __init__(self):
         """Initialize state with all directional keys up."""
-        self.state = dict.fromkeys(DIR_KEYS, False)
+        self.state = dict.fromkeys(self.DIR_KEYS, False)
 
     @property
     def down(self):
@@ -89,10 +94,10 @@ class KeysState:
             if event.type == QUIT:
                 sys.exit()
             # Update keys state.
-            if event.type == KEYDOWN and event.key in DIR_KEYS:
+            if event.type == KEYDOWN and event.key in self.DIR_KEYS:
                 self.state[event.key] = True
-            elif event.type == KEYUP and event.key in DIR_KEYS:
+            elif event.type == KEYUP and event.key in self.DIR_KEYS:
                 self.state[event.key] = False
         # Only return keys currently down. Convert pygame key constants
         # to string
-        return [DIR_KEYS[key] for key, down in self.state.items() if down]
+        return [self.DIR_KEYS[key] for key, down in self.state.items() if down]

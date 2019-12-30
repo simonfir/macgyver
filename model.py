@@ -1,15 +1,6 @@
 from random import shuffle
 from os import path
 
-# Vector pointing to the next tile in the direction corresponding
-# to the directional key.
-VECTORS = {
-    'left': (-1, 0),
-    'right': (1, 0),
-    'up': (0, -1),
-    'down': (0, 1),
-    }
-
 # Data files names
 MAZE_MAP = 'maze.txt'
 IMAGES_DIR = 'ressource'
@@ -18,7 +9,7 @@ PATH_IMG = 'path.png'
 MACGYVER_IMG = 'macgyver.png'
 GUARD_IMG = 'gardien.png'
 OBJECTS_IMGS = ('aiguille.png', 'seringue.png',
-                  'tube_plastique.png', 'ether.png')
+                'tube_plastique.png', 'ether.png')
 NBR_OBJECTS = len(OBJECTS_IMGS)
 
 
@@ -49,17 +40,24 @@ class MacGyver(GameElement):
     def __init__(self, coordinates):
         GameElement.__init__(self, MACGYVER_IMG, coordinates)
 
-    def next_tile_in_direction(self, key):
-        """Get the coordinates of the tile in the direction corresponding
-        to the key pressed. Return (x, y) tuple.
-
+    def next_tile_in_direction(self, direction):
+        """Get the coordinates of the next tile. Return (x, y) tuple.
         key -- string: 'left', 'right', 'up' or 'down'
         """
-        vx, vy = VECTORS[key]
-        return self.x + vx, self.y + vy
+        # Vector pointing to the next tile.
+        vec_x, vec_y = {
+            'left': (-1, 0),
+            'right': (1, 0),
+            'up': (0, -1),
+            'down': (0, 1),
+        }[direction]
+        return self.x + vec_x, self.y + vec_y
 
-    def move_in_direction(self, key):
-        self.x, self.y = self.next_tile_in_direction(key)
+    def move_in_direction(self, direction):
+        """Move MacGyvre to the next tile.
+        key -- string: 'left', 'right', 'up' or 'down'
+        """
+        self.x, self.y = self.next_tile_in_direction(direction)
 
 
 class Guard(GameElement):
@@ -139,8 +137,9 @@ class Maze:
                 elif char in (' ', 'S', 'E'):
                     self.paths[x, y] = GameElement(PATH_IMG, (x, y))
                 else:
-                    raise Exception("Invalid character '{}' at {},{} in maze file"
-                                    .format(char, y + 1, x + 1))
+                    raise Exception(
+                        "Invalid character '{}' at {},{} in maze file"
+                        .format(char, y + 1, x + 1))
                 if char == 'S':
                     self.start = (x, y)
                 elif char == 'E':
