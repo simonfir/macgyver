@@ -11,6 +11,8 @@ class View:
         """Initialize view, set grid's tile size in pixels."""
         pygame.init()
         self._tile_size = tile_size
+        # Store the loaded images
+        self._images = {}
 
     @staticmethod
     def wait(n):
@@ -33,9 +35,13 @@ class View:
 
     def _load_image(self, filename):
         """Load, convert image and scale image to tile size."""
-        return pygame.transform.scale(
-            pygame.image.load(filename).convert_alpha(),
-            (self._tile_size, self._tile_size))
+        # Store loaded images in self._images so that they're only
+        # loaded once.
+        if filename not in self._images:
+            self._images[filename] = pygame.transform.scale(
+                pygame.image.load(filename).convert_alpha(),
+                (self._tile_size, self._tile_size))
+        return self._images[filename]
 
     def draw(self, *elements):
         """Blit element's images and update display
