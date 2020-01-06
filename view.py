@@ -29,10 +29,11 @@ def _coords_to_pixels(coordinates):
 
 
 def load_image(filename):
-    """Load, convert image and scale image to tile size."""
-    return pygame.transform.scale(
-        pygame.image.load(filename).convert_alpha(),
-        (TILE_SIZE, TILE_SIZE))
+    """Load and scale image to tile size."""
+    surface = pygame.image.load(filename)
+    # White --> transparent.
+    surface.set_colorkey(pygame.Color('white'))
+    return pygame.transform.scale(surface, (TILE_SIZE, TILE_SIZE))
 
 
 def draw(*elements):
