@@ -65,7 +65,7 @@ class Controller:
         self._refresh()
 
     def collected_all_objects(self):
-        """Check if there is no left on the maze."""
+        """Check if there is no objects left on the maze."""
         return self.objects == {}
 
     def win(self):
