@@ -34,13 +34,16 @@ class View:
         return x * self._tile_size, y * self._tile_size
 
     def _load_image(self, filename):
-        """Load, convert image and scale image to tile size."""
+        """Load and scale image to tile size."""
         # Store loaded images in self._images so that they're only
         # loaded once.
         if filename not in self._images:
-            self._images[filename] = pygame.transform.scale(
-                pygame.image.load(filename).convert_alpha(),
-                (self._tile_size, self._tile_size))
+            surface = pygame.image.load(filename)
+            # White --> transparent.
+            surface.set_colorkey(pygame.Color('white'))
+            surface = pygame.transform.scale(
+                surface, (self._tile_size, self._tile_size))
+            self._images[filename] = surface
         return self._images[filename]
 
     def draw(self, *elements):
