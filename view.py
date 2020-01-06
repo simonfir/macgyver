@@ -78,9 +78,6 @@ class View:
         font = pygame.font.Font(None, self._tile_size)
         text = font.render(text, 1, pygame.Color(color))
         text_rect = text.get_rect().move(self._coords_to_pixels(coordinates))
-        # Erase previous text with black rectangle.
-        pygame.draw.rect(pygame.display.get_surface(), pygame.Color('black'),
-                         text_rect)
         # Blit.
         self._blit(text, text_rect)
         pygame.display.update()
