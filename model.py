@@ -1,4 +1,4 @@
-from random import shuffle
+from random import sample
 from os import path
 
 # Data files names
@@ -154,5 +154,4 @@ class Maze:
         # Don't add objects on start or exit
         coords.remove(self.start)
         coords.remove(self.exit)
-        shuffle(coords)
-        return coords[:n]
+        return sample(coords, n)
