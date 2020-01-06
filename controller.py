@@ -7,12 +7,12 @@ class Controller:
     def __init__(self):
         """Initiate view, add and draw all the game elements."""
         # Initialization
-        view.init()
+        self.view = view.View(tile_size=40)
         self.keys_state = view.KeysState()
         # Maze
         self.maze = model.Maze()
         # height + 1 to make space for counter.
-        view.set_dimensions(self.maze.width, self.maze.height + 1)
+        self.view.set_dimensions(self.maze.width, self.maze.height + 1)
         # Characters
         self.macgyver = model.MacGyver(self.maze.start)
         self.guard = model.Guard(self.maze.exit)
@@ -23,9 +23,9 @@ class Controller:
         self.counter = model.Counter(model.NBR_OBJECTS)
 
         # Draw all the elements on screen:
-        view.draw(*self.maze.paths.values(), *self.maze.walls.values(),
-              self.guard, self.macgyver, *self.objects.values())
-        view.draw_text_at(self.counter.text, (0, self.maze.height))
+        self.view.draw(*self.maze.paths.values(), *self.maze.walls.values(),
+                       self.guard, self.macgyver, *self.objects.values())
+        self.view.draw_text_at(self.counter.text, (0, self.maze.height))
 
     def keys_down(self):
         """Get which directional keys are currently pressed (down).
@@ -42,9 +42,9 @@ class Controller:
         """Move MacGyver one tile.
         direction -- 'left', 'right', 'up' or 'down'"""
         # Erase macgyver on previous tile
-        view.draw(self.maze.paths[self.macgyver.coordinates])
+        self.view.draw(self.maze.paths[self.macgyver.coordinates])
         self.macgyver.move_in_direction(direction)
-        view.draw(self.macgyver)
+        self.view.draw(self.macgyver)
 
     def object_here(self):
         """Check if MacGyver is on the same tile as an object.
@@ -60,7 +60,7 @@ class Controller:
         """Pick up object and update counter."""
         del self.objects[self.macgyver.coordinates]
         self.counter.increment()
-        view.draw_text_at(self.counter.text, (0, self.maze.height))
+        self.view.draw_text_at(self.counter.text, (0, self.maze.height))
 
     def collected_all_objects(self):
         """Check if there is no left on the maze."""
@@ -68,16 +68,15 @@ class Controller:
 
     def win(self):
         """Show victory message."""
-        view.draw_centered_text('YOU WIN!', '#ffff99')
-        view.wait(2000)
+        self.view.draw_centered_text('YOU WIN!', '#ffff99')
+        self.view.wait(2000)
 
     def game_over(self):
         """Show defeat message."""
         # Erase MacGyver with guard.
-        view.draw(self.guard)
-        view.draw_centered_text('GAME OVER', 'red')
-        view.wait(2000)
+        self.view.draw(self.guard)
+        self.view.draw_centered_text('GAME OVER', 'red')
+        self.view.wait(2000)
 
-    @staticmethod
-    def wait():
-        view.wait(100)
+    def wait(self):
+        self.view.wait(100)

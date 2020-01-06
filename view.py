@@ -4,77 +4,77 @@ import pygame
 from pygame.locals import *
 
 
-TILE_SIZE = 40
+class View:
+    """Draw tiles on a grid using pygame."""
 
+    def __init__(self, tile_size):
+        """Initialize view, set grid's tile size in pixels."""
+        pygame.init()
+        self._tile_size = tile_size
 
-def wait(n):
-    pygame.time.wait(n)
+    @staticmethod
+    def wait(n):
+        pygame.time.wait(n)
 
+    @staticmethod
+    def _blit(surface, rect):
+        pygame.display.get_surface().blit(surface, rect)
 
-def init():
-    pygame.init()
+    def set_dimensions(self, width, height):
+        """Set dimensions of the display.
 
+        width, height -- dimensions measured in tiles"""
+        pygame.display.set_mode(self._coords_to_pixels((width, height)))
 
-def set_dimensions(width, height):
-    """Set dimensions of the display.
+    def _coords_to_pixels(self, coordinates):
+        """Convert coordinates in tiles to position in pixels"""
+        x, y = coordinates
+        return x * self._tile_size, y * self._tile_size
 
-    width, height -- dimensions measured in tiles"""
-    pygame.display.set_mode(_coords_to_pixels((width, height)))
+    def _load_image(self, filename):
+        """Load, convert image and scale image to tile size."""
+        return pygame.transform.scale(
+            pygame.image.load(filename).convert_alpha(),
+            (self._tile_size, self._tile_size))
 
+    def draw(self, *elements):
+        """Blit element's images and update display
 
-def _coords_to_pixels(coordinates):
-    """Convert coordinates in tiles to position in pixels"""
-    x, y = coordinates
-    return x * TILE_SIZE, y * TILE_SIZE
+        elements -- object(s) containing an attribute image (str: file path) and
+        an attribute coordinates (tuple: coordinates in tiles)
+        """
+        for element in elements:
+            image = self._load_image(element.image)
+            # Convert coordinates.
+            rect = pygame.Rect(self._coords_to_pixels(element.coordinates),
+                               (self._tile_size, self._tile_size))
+            # Blit.
+            self._blit(image, rect)
+        pygame.display.update()
 
+    def draw_centered_text(self, text, color='white'):
+        """Blit text centered on display."""
+        font = pygame.font.Font(None, 100)
+        text = font.render(text, 1, pygame.Color(color))
+        # Center text.
+        display_rect = pygame.display.get_surface().get_rect()
+        text_rect = text.get_rect()
+        text_rect.center = display_rect.center
+        # Blit
+        self._blit(text, text_rect)
+        pygame.display.update()
 
-def load_image(filename):
-    """Load, convert image and scale image to tile size."""
-    return pygame.transform.scale(
-        pygame.image.load(filename).convert_alpha(),
-        (TILE_SIZE, TILE_SIZE))
-
-
-def draw(*elements):
-    """Blit element's images and update display
-    
-    elements -- object(s) containing an attribute image (str: file path) and
-    an attribute coordinates (tuple: coordinates in tiles)
-    """
-    for element in elements:
-        # Convert coordinates.
-        image = load_image(element.image)
-        rect = pygame.Rect(_coords_to_pixels(element.coordinates),
-                           (TILE_SIZE, TILE_SIZE))
+    def draw_text_at(self, text, coordinates, color='white'):
+        """Blit text on display at tiles coordinates."""
+        font = pygame.font.Font(None, self._tile_size)
+        text = font.render(text, 1, pygame.Color(color))
+        text_rect = text.get_rect().move(self._coords_to_pixels(coordinates))
+        # Erase previous text with black rectangle.
+        pygame.draw.rect(pygame.display.get_surface(), pygame.Color('black'),
+                         text_rect)
         # Blit.
-        pygame.display.get_surface().blit(image, rect)
-    pygame.display.update()
-
-
-def draw_centered_text(text, color='white'):
-    """Blit text centered on display."""
-    font = pygame.font.Font(None, 100)
-    text = font.render(text, 1, pygame.Color(color))
-    # Center text.
-    display_rect = pygame.display.get_surface().get_rect()
-    text_rect = text.get_rect()
-    text_rect.center = display_rect.center
-    # Blit
-    pygame.display.get_surface().blit(text, text_rect)
-    pygame.display.update()
-
-
-def draw_text_at(text, coordinates, color='white'):
-    """Blit text on display at tiles coordinates."""
-    font = pygame.font.Font(None, TILE_SIZE)
-    text = font.render(text, 1, pygame.Color(color))
-    text_rect = text.get_rect().move(_coords_to_pixels(coordinates))
-    # Erase previous text with black rectangle.
-    pygame.draw.rect(pygame.display.get_surface(), pygame.Color('black'),
-                     text_rect)
-    # Blit.
-    pygame.display.get_surface().blit(text, text_rect)
-    pygame.display.update()
+        self._blit(text, text_rect)
+        pygame.display.update()
 
 
 class KeysState:
