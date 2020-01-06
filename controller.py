@@ -11,7 +11,6 @@ class Controller:
         self.keys_state = view.KeysState()
         # Maze
         self.maze = model.Maze()
-        # height + 1 to make space for counter.
         self.view.set_dimensions(self.maze.width, self.maze.height)
         # Characters
         self.macgyver = model.MacGyver(self.maze.start)
@@ -26,9 +25,11 @@ class Controller:
 
     def _refresh(self):
         """Redraw all the elements on the screen."""
-        self.view.draw(*self.maze.paths.values(), *self.maze.walls.values(),
-                       self.guard, self.macgyver, *self.objects.values())
+        for element in (*self.maze.paths.values(), *self.maze.walls.values(),
+                        self.guard, self.macgyver, *self.objects.values()):
+            self.view.draw(element.image, element.coordinates)
         self.view.draw_text_at(self.counter.text, (0, self.maze.height -1))
+        self.view.update()
 
     def keys_down(self):
         """Get which directional keys are currently pressed (down).
@@ -44,7 +45,6 @@ class Controller:
     def move_macgyver(self, direction):
         """Move MacGyver one tile.
         direction -- 'left', 'right', 'up' or 'down'"""
-        # Erase macgyver on previous tile
         self.macgyver.move_in_direction(direction)
         self._refresh()
 
@@ -71,6 +71,7 @@ class Controller:
     def win(self):
         """Show victory message."""
         self.view.draw_centered_text('YOU WIN!', '#ffff99')
+        self.view.update()
         self.view.wait(2000)
 
     def game_over(self):
@@ -78,6 +79,7 @@ class Controller:
         # Erase MacGyver with guard.
         self.view.draw(self.guard)
         self.view.draw_centered_text('GAME OVER', 'red')
+        self.view.update()
         self.view.wait(2000)
 
     def wait(self):

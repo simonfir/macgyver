@@ -19,6 +19,10 @@ class View:
         pygame.time.wait(n)
 
     @staticmethod
+    def update():
+        pygame.display.update()
+
+    @staticmethod
     def _blit(surface, rect):
         pygame.display.get_surface().blit(surface, rect)
 
@@ -33,33 +37,23 @@ class View:
         x, y = coordinates
         return x * self._tile_size, y * self._tile_size
 
-    def _load_image(self, filename):
-        """Load and scale image to tile size."""
+    def draw(self, filename, coordinates):
+        """Draw image at coordinates."""
         # Store loaded images in self._images so that they're only
         # loaded once.
         if filename not in self._images:
-            surface = pygame.image.load(filename)
+            image = pygame.image.load(filename)
             # White --> transparent.
-            surface.set_colorkey(pygame.Color('white'))
-            surface = pygame.transform.scale(
-                surface, (self._tile_size, self._tile_size))
-            self._images[filename] = surface
-        return self._images[filename]
+            image.set_colorkey(pygame.Color('white'))
+            image = pygame.transform.scale(
+                image, (self._tile_size, self._tile_size))
+            self._images[filename] = image
 
-    def draw(self, *elements):
-        """Blit element's images and update display
-
-        elements -- object(s) containing an attribute image (str: file path) and
-        an attribute coordinates (tuple: coordinates in tiles)
-        """
-        for element in elements:
-            image = self._load_image(element.image)
-            # Convert coordinates.
-            rect = pygame.Rect(self._coords_to_pixels(element.coordinates),
-                               (self._tile_size, self._tile_size))
-            # Blit.
-            self._blit(image, rect)
-        pygame.display.update()
+        # Convert coordinates.
+        rect = pygame.Rect(self._coords_to_pixels(coordinates),
+                           (self._tile_size, self._tile_size))
+        # Blit.
+        self._blit(self._images[filename], rect)
 
     def draw_centered_text(self, text, color='white'):
         """Blit text centered on display."""
@@ -71,7 +65,6 @@ class View:
         text_rect.center = display_rect.center
         # Blit
         self._blit(text, text_rect)
-        pygame.display.update()
 
     def draw_text_at(self, text, coordinates, color='white'):
         """Blit text on display at tiles coordinates."""
@@ -80,7 +73,6 @@ class View:
         text_rect = text.get_rect().move(self._coords_to_pixels(coordinates))
         # Blit.
         self._blit(text, text_rect)
-        pygame.display.update()
 
 
 class KeysState:
