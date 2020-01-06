@@ -23,8 +23,6 @@ class GameElement:
         filename -- image file name
         coordinates -- (x, y) coordinates measured in tiles
         """
-        # Store coordinates in tiles (they will be converted to pixels
-        # in the draw method)
         self.x, self.y = coordinates
         self.image = path.join(path.dirname(__file__), IMAGES_DIR, filename)
 
