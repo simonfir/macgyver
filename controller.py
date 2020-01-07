@@ -77,7 +77,7 @@ class Controller:
     def game_over(self):
         """Show defeat message."""
         # Erase MacGyver with guard.
-        self.view.draw(self.guard)
+        self.view.draw(self.guard.image, self.guard.coordinates)
         self.view.draw_centered_text('GAME OVER', 'red')
         self.view.update()
         self.view.wait(2000)
