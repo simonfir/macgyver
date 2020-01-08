@@ -5,12 +5,17 @@ import view
 class Controller:
 
     def __init__(self):
-        """Initiate view, add and draw all the game elements."""
+        """Initiate view"""
         # Initialization
         self.view = view.View(tile_size=40)
         self.keys_state = view.KeysState()
+        self.level = 1
+        self._load_level()
+
+    def _load_level(self):
+        """Load level, add and draw all the game elements."""
         # Maze
-        self.maze = model.Maze()
+        self.maze = model.Maze(self.level)
         self.view.set_dimensions(self.maze.width, self.maze.height)
         # Characters
         self.macgyver = model.MacGyver(self.maze.start)
@@ -20,8 +25,24 @@ class Controller:
         self.objects = model.create_objects(coordinates_list)
         # Counter
         self.counter = model.Counter(model.NBR_OBJECTS)
-
+        # Draw all the elements and display level name for 1 s.
         self._refresh()
+        self.view.draw_centered_text('LEVEL {}'.format(self.level), 'green')
+        self.view.update()
+        self.view.wait(1000)
+        self._refresh()
+
+    def next_level(self):
+        """Load next level."""
+        self.level += 1
+        if self.level <= model.NBR_LEVELS:
+            self._load_level()
+        else:
+            quit()
+
+    def restart_level(self):
+        """Reload current level."""
+        self._load_level()
 
     def _refresh(self):
         """Redraw all the elements on the screen."""

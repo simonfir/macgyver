@@ -1,8 +1,7 @@
 from random import sample
 from os import path
 
-# Data files names
-MAZE_MAP = 'maze.txt'
+# Image files names
 IMAGES_DIR = 'ressource'
 WALL_IMG = 'wall.png'
 PATH_IMG = 'path.png'
@@ -11,6 +10,18 @@ GUARD_IMG = 'gardien.png'
 OBJECTS_IMGS = ('aiguille.png', 'seringue.png',
                 'tube_plastique.png', 'ether.png')
 NBR_OBJECTS = len(OBJECTS_IMGS)
+
+# Level files names
+LEVELS_DIR = 'levels'
+# Automatically find level files in LEVELS_DIR.
+LEVELS = []
+while 1:
+    file = path.join(path.dirname(__file__), LEVELS_DIR,
+                     'level{}.txt'.format(len(LEVELS) + 1))
+    if not path.isfile(file):
+        break
+    LEVELS.append(file)
+NBR_LEVELS = len(LEVELS)
 
 
 class GameElement:
@@ -97,18 +108,17 @@ class Maze:
     """Object containing the maze's elements: walls and path tiles,
     start and exit tions."""
 
-    def __init__(self):
-        """Load maze map from file.
+    def __init__(self, level):
+        """Load level maze map from file.
 
-        maze_file -- maze map file name
-            The maze file must contain a visual representation of the
+            The level file must contain a visual representation of the
             maze map where each tile is represented by a character:
             - wall: '#'
             - path: ' ' (space)
             - start: 'S'
             - exit: 'E'
         """
-        maze_file = path.join(path.dirname(__file__), MAZE_MAP)
+        maze_file = LEVELS[level - 1]
         # Get list of file's lines without newline characters.
         with open(maze_file, 'r') as f:
             lines = [l[:-1] for l in f]

@@ -14,13 +14,15 @@ def main():
                 if ctl.object_here():
                     ctl.pick_up_object()
                 # When MacGyver reaches the guard, if no objects are left
-                # in the maze, he wins; otherwise, game over.
+                # in the maze, he wins and goes to the next level;
+                # otherwise, game over and level is restarted.
                 if ctl.guard_here():
                     if ctl.collected_all_objects():
                         ctl.win()
+                        ctl.next_level()
                     else:
                         ctl.game_over()
-                    return
+                        ctl.restart_level()
         ctl.wait()
 
 
