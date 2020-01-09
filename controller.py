@@ -30,10 +30,9 @@ class Controller:
         self.view.draw_text_at(self.counter.text, (0, self.maze.height -1))
         self.view.update()
 
-    def keys_down(self):
-        """Get which directional keys are currently pressed (down).
-        Return list."""
-        return self.view.get_keys_down()
+    def key_down(self):
+        """Get which directional key is currently pressed (down)."""
+        return self.view.get_key_down()
 
     def next_tile_is_path(self, direction):
         """Check if the tile next to MacGvyer is a path.

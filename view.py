@@ -16,24 +16,23 @@ class View:
         self._tile_size = tile_size
         # Store the loaded images
         self._images = {}
-        # Initialize state with all directional keys up.
-        self._keys_down = dict.fromkeys(self.DIR_KEYS, False)
+        # The directional key currently down
+        self._key_down = None
 
-    def get_keys_down(self):
-        """Update keys state and return a list of the directional keys
-        currently down."""
+    def get_key_down(self):
+        """Get which directional key is currently down. Return str or
+        None if none are down."""
+        # Get key down (if more than one key down in the queue, return
+        # the last one)
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit()
-            # Update keys state.
             if event.type == KEYDOWN and event.key in self.DIR_KEYS:
-                self._keys_down[event.key] = True
-            elif event.type == KEYUP and event.key in self.DIR_KEYS:
-                self._keys_down[event.key] = False
-        # Only return keys currently down. Convert pygame key constants
-        # to string
-        return [self.DIR_KEYS[key]
-                for key, down in self._keys_down.items() if down]
+                self._key_down = event.key
+            elif event.type == KEYUP and event.key == self._key_down:
+                self._key_down = None
+        # Convert pygame key constant to string
+        return self.DIR_KEYS.get(self._key_down, None)
 
     @staticmethod
     def wait(n):
