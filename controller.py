@@ -8,7 +8,6 @@ class Controller:
         """Initiate view, add and draw all the game elements."""
         # Initialization
         self.view = view.View(tile_size=40)
-        self.keys_state = view.KeysState()
         # Maze
         self.maze = model.Maze()
         self.view.set_dimensions(self.maze.width, self.maze.height)
@@ -34,7 +33,7 @@ class Controller:
     def keys_down(self):
         """Get which directional keys are currently pressed (down).
         Return list."""
-        return self.keys_state.down
+        return self.view.get_keys_down()
 
     def next_tile_is_path(self, direction):
         """Check if the tile next to MacGvyer is a path.

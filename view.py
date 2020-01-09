@@ -7,12 +7,33 @@ from pygame.locals import *
 class View:
     """Draw tiles on a grid using pygame."""
 
+    # Convert pygame key constant to string
+    DIR_KEYS = {K_LEFT: 'left', K_RIGHT: 'right', K_UP: 'up', K_DOWN: 'down'}
+
     def __init__(self, tile_size):
         """Initialize view, set grid's tile size in pixels."""
         pygame.init()
         self._tile_size = tile_size
         # Store the loaded images
         self._images = {}
+        # Initialize state with all directional keys up.
+        self._keys_down = dict.fromkeys(self.DIR_KEYS, False)
+
+    def get_keys_down(self):
+        """Update keys state and return a list of the directional keys
+        currently down."""
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                sys.exit()
+            # Update keys state.
+            if event.type == KEYDOWN and event.key in self.DIR_KEYS:
+                self._keys_down[event.key] = True
+            elif event.type == KEYUP and event.key in self.DIR_KEYS:
+                self._keys_down[event.key] = False
+        # Only return keys currently down. Convert pygame key constants
+        # to string
+        return [self.DIR_KEYS[key]
+                for key, down in self._keys_down.items() if down]
 
     @staticmethod
     def wait(n):
@@ -73,29 +94,3 @@ class View:
         text_rect = text.get_rect().move(self._coords_to_pixels(coordinates))
         # Blit.
         self._blit(text, text_rect)
-
-
-class KeysState:
-    """Store the state (up or down) of the directional keys."""
-    # Convert pygame key constant to string
-    DIR_KEYS = {K_LEFT: 'left', K_RIGHT: 'right', K_UP: 'up', K_DOWN: 'down'}
-
-    def __init__(self):
-        """Initialize state with all directional keys up."""
-        self.state = dict.fromkeys(self.DIR_KEYS, False)
-
-    @property
-    def down(self):
-        """Update keys state and return a list of the directional keys
-        currently down."""
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                sys.exit()
-            # Update keys state.
-            if event.type == KEYDOWN and event.key in self.DIR_KEYS:
-                self.state[event.key] = True
-            elif event.type == KEYUP and event.key in self.DIR_KEYS:
-                self.state[event.key] = False
-        # Only return keys currently down. Convert pygame key constants
-        # to string
-        return [self.DIR_KEYS[key] for key, down in self.state.items() if down]
