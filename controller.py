@@ -5,10 +5,9 @@ import view
 class Controller:
 
     def __init__(self):
-        """Initiate view"""
+        """Initiate view, add and draw all the game elements."""
         # Initialization
         self.view = view.View(tile_size=40)
-        self.keys_state = view.KeysState()
         self.level = 1
         self._load_level()
 
@@ -32,18 +31,6 @@ class Controller:
         self.view.wait(1000)
         self._refresh()
 
-    def next_level(self):
-        """Load next level."""
-        self.level += 1
-        if self.level <= model.NBR_LEVELS:
-            self._load_level()
-        else:
-            quit()
-
-    def restart_level(self):
-        """Reload current level."""
-        self._load_level()
-
     def _refresh(self):
         """Redraw all the elements on the screen."""
         for element in (*self.maze.paths.values(), *self.maze.walls.values(),
@@ -52,10 +39,9 @@ class Controller:
         self.view.draw_text_at(self.counter.text, (0, self.maze.height -1))
         self.view.update()
 
-    def keys_down(self):
-        """Get which directional keys are currently pressed (down).
-        Return list."""
-        return self.keys_state.down
+    def key_down(self):
+        """Get which directional key is currently pressed (down)."""
+        return self.view.get_key_down()
 
     def next_tile_is_path(self, direction):
         """Check if the tile next to MacGvyer is a path.
@@ -90,18 +76,24 @@ class Controller:
         return self.objects == {}
 
     def win(self):
-        """Show victory message."""
+        """Show victory message and load next level."""
         self.view.draw_centered_text('YOU WIN!', '#ffff99')
         self.view.update()
         self.view.wait(2000)
+        self.level += 1
+        if self.level <= model.NBR_LEVELS:
+            self._load_level()
+        else:
+            quit()
 
     def game_over(self):
-        """Show defeat message."""
+        """Show defeat message and restart level."""
         # Erase MacGyver with guard.
         self.view.draw(self.guard.image, self.guard.coordinates)
         self.view.draw_centered_text('GAME OVER', 'red')
         self.view.update()
         self.view.wait(2000)
+        self._load_level()
 
     def wait(self):
         self.view.wait(100)
